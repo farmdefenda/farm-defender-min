@@ -12,7 +12,7 @@ on:
   workflow_dispatch:  # Allow manual triggering
 
 env:
-  FLUTTER_VERSION: '3.24.0'  # Update to your preferred Flutter version
+  FLUTTER_VERSION: '3.29.2'  # Updated to support Dart SDK ^3.9.2
   JAVA_VERSION: '17'
 
 jobs:
