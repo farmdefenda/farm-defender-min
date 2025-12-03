@@ -1,0 +1,307 @@
+# ============================================================================
+# COMPREHENSIVE .GITIGNORE FOR FLUTTER PROJECT
+# Only source code, assets, and essential config files will be committed
+# ============================================================================
+
+# ============================================================================
+# SYSTEM FILES - OS-specific junk
+# ============================================================================
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+*.dmg
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================================================
+# IDE AND EDITOR FILES - No local editor config
+# ============================================================================
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Cursor IDE
+.cursor/
+.cursorignore
+
+# IntelliJ IDEA / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+atlassian-ide-plugin.xml
+com_crashlytics_export_strings.xml
+
+# Android Studio Navigation editor temp files
+.navigation/
+
+# Android Studio captures folder
+captures/
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# Vim
+*.swp
+*.swo
+*.swn
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+Sessionx.vim
+.netrwhist
+tags
+[._]*.un~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Atom
+.atom/
+
+# ============================================================================
+# FLUTTER / DART - Generated files
+# ============================================================================
+# Dart tool
+.dart_tool/
+
+# Package files
+.packages
+.pub-cache/
+.pub/
+pubspec.lock
+
+# Build output
+/build/
+**/build/
+
+# Generated plugin registrants
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Documentation
+**/doc/api/
+doc/api/
+
+# Coverage
+/coverage/
+*.lcov
+
+# Symbolication
+app.*.symbols
+
+# Obfuscation
+app.*.map.json
+
+# Generated Dart files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# ============================================================================
+# ANDROID - Local and build files
+# ============================================================================
+# Gradle
+.gradle/
+**/android/.gradle/
+**/android/gradle/
+!**/android/gradle/wrapper/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/key.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/**/GeneratedPluginRegistrant.kt
+
+# Build outputs
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/app/build/
+**/android/build/
+**/android/.cxx/
+
+# Signing - CRITICAL: Never commit!
+*.jks
+*.keystore
+key.properties
+signing.properties
+
+# Local configuration
+**/android/local.properties
+**/android/.settings/
+
+# Keystore generation scripts output
+scripts/*.jks
+scripts/keystore_base64.txt
+scripts/*.keystore
+
+# ============================================================================
+# iOS - Local and build files  
+# ============================================================================
+**/ios/.symlinks/
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/App.framework/
+**/ios/Flutter/Flutter.framework/
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/engine/
+**/ios/Flutter/ephemeral/
+**/ios/Pods/
+**/ios/.generated/
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/ServiceDefinitions.json
+**/ios/Runner.xcworkspace/xcshareddata/
+**/ios/Runner.xcworkspace/xcuserdata/
+**/ios/Runner.xcodeproj/xcuserdata/
+**/ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+
+# CocoaPods
+Podfile.lock
+
+# Fastlane
+**/ios/fastlane/report.xml
+**/ios/fastlane/Preview.html
+**/ios/fastlane/screenshots
+**/ios/fastlane/test_output
+
+# ============================================================================
+# WEB - Build files
+# ============================================================================
+**/web/.dart_tool/
+
+# ============================================================================
+# MACOS - Local files
+# ============================================================================
+**/macos/Flutter/ephemeral/
+**/macos/Pods/
+**/macos/.symlinks/
+
+# ============================================================================
+# LINUX - Local files
+# ============================================================================
+**/linux/flutter/ephemeral/
+
+# ============================================================================
+# WINDOWS - Local files
+# ============================================================================
+**/windows/flutter/ephemeral/
+
+# ============================================================================
+# LOGS AND TEMP FILES
+# ============================================================================
+*.log
+*.tmp
+*.temp
+*.cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================================================================
+# TEST AND DEBUG
+# ============================================================================
+# Test failures
+test-results/
+test_driver/
+
+# Crash reports
+crash_log.txt
+*.crash
+
+# ============================================================================
+# MISCELLANEOUS
+# ============================================================================
+# Archives
+*.7z
+*.jar
+*.rar
+*.zip
+*.gz
+*.gzip
+*.tgz
+*.bzip
+*.bzip2
+*.xz
+*.lzma
+*.cab
+*.iso
+*.tar
+*.dmg
+*.xpi
+*.gem
+*.egg
+*.deb
+*.rpm
+*.msi
+*.msm
+*.msp
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+
+# History and local files
+.history/
+.buildlog/
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# Python (if using any Python scripts)
+*.py[cod]
+__pycache__/
+*.so
+.Python
+env/
+venv/
+.env
+.venv
+
+# Node (if using any Node tools)
+node_modules/
+.npm/
+
+# ============================================================================
+# PROJECT-SPECIFIC EXCLUSIONS
+# ============================================================================
+# Any local notes or personal files
+notes.txt
+TODO.txt
+personal/
+private/
+local/
+
+# Exported APKs/AABs (use GitHub releases instead)
+*.apk
+*.aab
+*.ipa
