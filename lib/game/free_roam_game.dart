@@ -19,6 +19,9 @@ class FreeRoamGame extends FlameGame with DragCallbacks, HasCollisionDetection {
   late DraggableTower chickenTower;
   late DraggableTower gooseTower;
 
+  // Background component
+  SpriteComponent? _background;
+
   // Spawning
   Timer? spawnTimer;
   int totalCrittersSpawned = 0;
@@ -67,14 +70,14 @@ class FreeRoamGame extends FlameGame with DragCallbacks, HasCollisionDetection {
   Future<void> _loadBackground() async {
     // Load farm background
     final bgSprite = await loadSprite('farm_bg.png');
-    world.add(
-      SpriteComponent(
-        sprite: bgSprite,
-        size: Vector2(worldWidth, worldHeight),
-        position: Vector2.zero(),
-        priority: -10,
-      ),
+    _background = SpriteComponent(
+      sprite: bgSprite,
+      size: Vector2(worldWidth, worldHeight),
+      position: Vector2(worldWidth / 2, worldHeight / 2),
+      anchor: Anchor.center,
+      priority: -10,
     );
+    world.add(_background!);
 
     // Add subtle grid overlay
     for (int i = 0; i <= 20; i++) {
@@ -100,6 +103,45 @@ class FreeRoamGame extends FlameGame with DragCallbacks, HasCollisionDetection {
 
     // Add edge indicators to show where critters can spawn
     _addEdgeIndicators();
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+
+    // Calculate target aspect ratio
+    final double screenAspect = size.x / size.y;
+    final double mapAspect = worldWidth / worldHeight;
+
+    // Default visible size
+    double newVisibleWidth = worldWidth;
+    double newVisibleHeight = worldHeight;
+
+    if (screenAspect < mapAspect) {
+      // Screen is narrower than map (e.g. Portrait)
+      // Fit width to screen, extend height
+      newVisibleWidth = worldWidth;
+      newVisibleHeight = worldWidth / screenAspect;
+    } else {
+      // Screen is wider than map (e.g. Landscape)
+      // Fit height to screen, extend width
+      newVisibleHeight = worldHeight;
+      newVisibleWidth = worldHeight * screenAspect;
+    }
+
+    // Update camera viewport size to match the new calculated visible size
+    camera.viewfinder.visibleGameSize =
+        Vector2(newVisibleWidth, newVisibleHeight);
+    camera.viewfinder.position = Vector2(worldWidth / 2, worldHeight / 2);
+
+    // Resize background to cover the entire visible area if initialized
+    if (_background != null) {
+      double scaleX = newVisibleWidth / worldWidth;
+      double scaleY = newVisibleHeight / worldHeight;
+      double scale = scaleX > scaleY ? scaleX : scaleY;
+
+      _background!.size = Vector2(worldWidth * scale, worldHeight * scale);
+    }
   }
 
   void _addEdgeIndicators() {

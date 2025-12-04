@@ -13,6 +13,10 @@ class DraggableTower extends SpriteComponent
   late double interceptCooldown;
   double _cooldownTimer = 0;
   bool isDragging = false;
+  
+  // Drag offset for visibility in portrait mode
+  bool _isOffset = false;
+  static const double dragOffsetY = 75.0;
 
   // Visual feedback
   late CircleComponent _rangeIndicator;
@@ -123,6 +127,12 @@ class DraggableTower extends SpriteComponent
   void onDragStart(DragStartEvent event) {
     super.onDragStart(event);
     isDragging = true;
+    
+    // Apply offset in ALL orientations so finger never blocks the character
+    _isOffset = true;
+    position.y -= dragOffsetY;
+    _clampPosition();
+    
     // Show range while dragging
     _rangeIndicator.paint.color = const Color(0x224CAF50);
     priority = 100; // Bring to front while dragging
@@ -139,6 +149,14 @@ class DraggableTower extends SpriteComponent
   void onDragEnd(DragEndEvent event) {
     super.onDragEnd(event);
     isDragging = false;
+    
+    // Reset offset if it was applied
+    if (_isOffset) {
+      position.y += dragOffsetY;
+      _isOffset = false;
+      _clampPosition();
+    }
+
     _rangeIndicator.paint.color = const Color(0x00000000);
     priority = 20;
   }
@@ -147,6 +165,14 @@ class DraggableTower extends SpriteComponent
   void onDragCancel(DragCancelEvent event) {
     super.onDragCancel(event);
     isDragging = false;
+    
+    // Reset offset if it was applied
+    if (_isOffset) {
+      position.y += dragOffsetY;
+      _isOffset = false;
+      _clampPosition();
+    }
+    
     _rangeIndicator.paint.color = const Color(0x00000000);
     priority = 20;
   }

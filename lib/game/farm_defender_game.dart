@@ -20,6 +20,9 @@ class FarmDefenderGame extends FlameGame
   late Tower chickenTower;
   late Tower gooseTower;
   Tower? selectedTower;
+  
+  // Background component
+  SpriteComponent? _background;
 
   static const double worldWidth = 800;
   static const double worldHeight = 480;
@@ -214,14 +217,14 @@ class FarmDefenderGame extends FlameGame
 
   Future<void> _renderMap() async {
     final bgSprite = await loadSprite('farm_bg.png');
-    world.add(
-      SpriteComponent(
-        sprite: bgSprite,
-        size: Vector2(worldWidth, worldHeight),
-        position: Vector2.zero(),
-        priority: -10,
-      ),
+    _background = SpriteComponent(
+      sprite: bgSprite,
+      size: Vector2(worldWidth, worldHeight),
+      position: Vector2(worldWidth / 2, worldHeight / 2),
+      anchor: Anchor.center,
+      priority: -10,
     );
+    world.add(_background!);
 
     for (int row = 0; row < grid.length; row++) {
       for (int col = 0; col < grid[row].length; col++) {
@@ -288,6 +291,45 @@ class FarmDefenderGame extends FlameGame
         priority: -6,
       ),
     );
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+
+    // Calculate target aspect ratio
+    final double screenAspect = size.x / size.y;
+    final double mapAspect = worldWidth / worldHeight;
+
+    // Default visible size
+    double newVisibleWidth = worldWidth;
+    double newVisibleHeight = worldHeight;
+
+    if (screenAspect < mapAspect) {
+      // Screen is narrower than map (e.g. Portrait)
+      // Fit width to screen, extend height
+      newVisibleWidth = worldWidth;
+      newVisibleHeight = worldWidth / screenAspect;
+    } else {
+      // Screen is wider than map (e.g. Landscape)
+      // Fit height to screen, extend width
+      newVisibleHeight = worldHeight;
+      newVisibleWidth = worldHeight * screenAspect;
+    }
+
+    // Update camera viewport size to match the new calculated visible size
+    camera.viewfinder.visibleGameSize =
+        Vector2(newVisibleWidth, newVisibleHeight);
+    camera.viewfinder.position = Vector2(worldWidth / 2, worldHeight / 2);
+
+    // Resize background to cover the entire visible area if initialized
+    if (_background != null) {
+      double scaleX = newVisibleWidth / worldWidth;
+      double scaleY = newVisibleHeight / worldHeight;
+      double scale = scaleX > scaleY ? scaleX : scaleY;
+
+      _background!.size = Vector2(worldWidth * scale, worldHeight * scale);
+    }
   }
 
   @override
