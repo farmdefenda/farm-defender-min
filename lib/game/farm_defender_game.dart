@@ -349,12 +349,34 @@ class FarmDefenderGame extends FlameGame
 
   /// Try to use eggs for throwing - returns true if successful
   bool tryUseEggs(int count) {
-    return gameNotifier.useEggs(count);
+    final result = gameNotifier.useEggs(count);
+    
+    // Check if player is now out of eggs
+    if (result && gameNotifier.isOutOfEggs) {
+      _triggerOutOfEggsGameOver();
+    }
+    
+    return result;
   }
 
   /// Earn eggs from stopping critters
   void earnEggs(int count) {
     gameNotifier.earnEggs(count);
+  }
+  
+  /// Trigger game over when player runs out of eggs
+  void _triggerOutOfEggsGameOver() {
+    if (gameNotifier.currentState.isGameOver || 
+        gameNotifier.currentState.isVictory) {
+      return;
+    }
+    
+    print('Out of eggs! Game Over!');
+    gameNotifier.forceGameOver();
+    FlameAudio.play('game_over.wav');
+    FlameAudio.bgm.stop();
+    pauseEngine();
+    overlays.add('GameOver');
   }
 
   void addCritterStop(int eggReward) {
@@ -379,5 +401,35 @@ class FarmDefenderGame extends FlameGame
   void resumeGame() {
     overlays.remove('PauseMenu');
     resumeEngine();
+  }
+
+  /// Fire chicken tower from external button
+  bool fireChicken() {
+    // Don't fire if game is over or won
+    if (gameNotifier.currentState.isGameOver ||
+        gameNotifier.currentState.isVictory) {
+      return false;
+    }
+    final result = chickenTower.fireAtNearestCritter();
+    if (!result) {
+      // Play feedback sound when attack fails (no critters or not enough eggs)
+      FlameAudio.play('click.wav', volume: 0.5);
+    }
+    return result;
+  }
+
+  /// Fire goose tower from external button
+  bool fireGoose() {
+    // Don't fire if game is over or won
+    if (gameNotifier.currentState.isGameOver ||
+        gameNotifier.currentState.isVictory) {
+      return false;
+    }
+    final result = gooseTower.fireAtNearestCritter();
+    if (!result) {
+      // Play feedback sound when attack fails (no critters or not enough eggs)
+      FlameAudio.play('click.wav', volume: 0.5);
+    }
+    return result;
   }
 }

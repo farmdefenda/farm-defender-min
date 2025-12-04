@@ -173,15 +173,25 @@ class GameNotifier extends Notifier<GameState> {
       state = state.copyWith(isGameOver: true);
     }
   }
+  
+  /// Force game over (used when out of eggs)
+  void forceGameOver() {
+    if (state.isGameOver || state.isVictory) return;
+    state = state.copyWith(isGameOver: true);
+  }
 
   /// Use eggs for attack - returns true if enough eggs
   bool useEggs(int count) {
     if (state.isGameOver || state.isVictory) return false;
     if (state.eggs < count) return false;
 
-    state = state.copyWith(eggs: state.eggs - count);
+    final newEggs = state.eggs - count;
+    state = state.copyWith(eggs: newEggs);
     return true;
   }
+  
+  /// Check if player is out of eggs (can't afford minimum attack)
+  bool get isOutOfEggs => state.eggs < 1; // Chicken costs 1 egg minimum
 
   /// Earn eggs from stopping critters
   void earnEggs(int count) {

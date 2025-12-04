@@ -46,94 +46,152 @@ class _FreeRoamGameScreenState extends ConsumerState<FreeRoamGameScreen> {
   }
 }
 
-/// HUD for Free Roam mode
-class FreeRoamHUDOverlay extends ConsumerWidget {
+/// HUD for Free Roam mode - repositioned to avoid overlapping gameplay
+class FreeRoamHUDOverlay extends ConsumerStatefulWidget {
   final FreeRoamGame game;
 
   const FreeRoamHUDOverlay({super.key, required this.game});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<FreeRoamHUDOverlay> createState() => _FreeRoamHUDOverlayState();
+}
+
+class _FreeRoamHUDOverlayState extends ConsumerState<FreeRoamHUDOverlay>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+  bool _showTip = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
+    );
+
+    // Auto-hide tip after 4 seconds
+    Future.delayed(const Duration(seconds: 4), () {
+      if (mounted) {
+        _fadeController.forward().then((_) {
+          if (mounted) {
+            setState(() => _showTip = false);
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _fadeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final gameState = ref.watch(gameProvider);
+    final mediaQuery = MediaQuery.of(context);
+    final bottomPadding = mediaQuery.padding.bottom;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top bar with stats
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Lives and Level
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      const Text('❤️', style: TextStyle(fontSize: 18)),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${gameState.lives}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Text(
-                        'FREE ROAM',
-                        style: TextStyle(
-                          color: Colors.orange.shade300,
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Pause button
-                IconButton(
-                  onPressed: () => game.pauseGame(),
-                  icon: const Icon(Icons.pause_circle_filled),
-                  color: Colors.white,
-                  iconSize: 36,
-                ),
-              ],
-            ),
-
-            const Spacer(),
-
-            // Bottom bar with progress
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    return Stack(
+      children: [
+        // Top-left: Lives and FREE ROAM label - compact and out of the way
+        Positioned(
+          top: 0,
+          left: 0,
+          child: SafeArea(
+            child: Container(
+              margin: const EdgeInsets.only(left: 8, top: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(12),
+                color: Colors.black.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('🎯', style: TextStyle(fontSize: 20)),
-                  const SizedBox(width: 8),
+                  const Text('❤️', style: TextStyle(fontSize: 16)),
+                  const SizedBox(width: 4),
                   Text(
-                    '${gameState.crittersStopped} / ${gameState.stopsToWin}',
+                    '${gameState.lives}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  // Progress bar
-                  SizedBox(
-                    width: 100,
+                  const SizedBox(width: 10),
+                  Text(
+                    'FREE ROAM',
+                    style: TextStyle(
+                      color: Colors.orange.shade300,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        // Top-right: Pause button - with proper safe area
+        Positioned(
+          top: 0,
+          right: 0,
+          child: SafeArea(
+            child: Container(
+              margin: const EdgeInsets.only(right: 8, top: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.5),
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                onPressed: () => widget.game.pauseGame(),
+                icon: const Icon(Icons.pause_rounded),
+                color: Colors.white,
+                iconSize: 28,
+                padding: const EdgeInsets.all(8),
+                constraints: const BoxConstraints(),
+              ),
+            ),
+          ),
+        ),
+
+        // Bottom-left: Progress counter - compact pill shape
+        Positioned(
+          left: 8,
+          bottom: bottomPadding + 12,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.65),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text('🎯', style: TextStyle(fontSize: 16)),
+                const SizedBox(width: 6),
+                Text(
+                  '${gameState.crittersStopped} / ${gameState.stopsToWin}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Compact progress bar
+                SizedBox(
+                  width: 60,
+                  height: 6,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
                     child: LinearProgressIndicator(
                       value: gameState.crittersStopped / gameState.stopsToWin,
                       backgroundColor: Colors.grey.shade800,
@@ -144,27 +202,34 @@ class FreeRoamHUDOverlay extends ConsumerWidget {
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-
-            const SizedBox(height: 8),
-
-            // Tip
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.black38,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                '👆 Drag chicken & goose to intercept critters!',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+
+        // Instruction tip - fades out after a few seconds
+        if (_showTip)
+          Positioned(
+            left: 8,
+            bottom: bottomPadding + 52,
+            child: FadeTransition(
+              opacity: _fadeAnimation,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Text(
+                  '👆 Drag chicken & goose to intercept!',
+                  style: TextStyle(color: Colors.white70, fontSize: 11),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -203,7 +268,8 @@ class FreeRoamGameOverOverlay extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
               child: const Text('BACK TO MENU', style: TextStyle(fontSize: 18)),
             ),
@@ -241,7 +307,8 @@ class FreeRoamPauseMenuOverlay extends StatelessWidget {
               onPressed: () => game.resumeGame(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
               child: const Text('RESUME', style: TextStyle(fontSize: 18)),
             ),
@@ -253,7 +320,8 @@ class FreeRoamPauseMenuOverlay extends StatelessWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.grey,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
               child: const Text('QUIT', style: TextStyle(fontSize: 18)),
             ),
@@ -308,12 +376,14 @@ class FreeRoamVictoryOverlay extends ConsumerWidget {
                     mode: GameMode.freeRoam,
                   );
                   Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const FreeRoamGameScreen()),
+                    MaterialPageRoute(
+                        builder: (_) => const FreeRoamGameScreen()),
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                 ),
                 child: const Text('NEXT LEVEL', style: TextStyle(fontSize: 18)),
               ),
@@ -325,7 +395,8 @@ class FreeRoamVictoryOverlay extends ConsumerWidget {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               ),
               child: const Text('BACK TO MENU', style: TextStyle(fontSize: 18)),
             ),
@@ -335,4 +406,3 @@ class FreeRoamVictoryOverlay extends ConsumerWidget {
     );
   }
 }
-
